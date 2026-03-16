@@ -2,6 +2,9 @@
 <html lang="ja">
 <head>
 <link rel="stylesheet" href="ui.css">
+<link rel="manifest" href="./manifest.json">
+
+
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,6 +87,13 @@
         localStorage.setItem("heisoku_diff", total_diff);
 		console.log("保存された heisoku_diff =", localStorage.getItem("heisoku_diff"));
     }
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js")
+    .then(() => console.log("SW 登録成功"))
+    .catch(err => console.log("SW 登録失敗:", err));
+}
 </script>
 
 </body>
