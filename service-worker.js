@@ -2,6 +2,10 @@ const CACHE_NAME = "shipment-app-cache-v1";
 const urlsToCache = [
   "index.html",
   "next.html",
+  "next2.html",
+"next3.html",
+"next4.html",
+"ui,css",
   "manifest.json",
   "icons/icon-192.png",
   "icons/icon-512.png"

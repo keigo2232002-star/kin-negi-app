@@ -1,7 +1,7 @@
 {
-  "name": "出荷数量決定アプリ",
+  "name": "出荷調整システム",
   "short_name": "出荷アプリ",
-  "start_url": "index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0078d7",
