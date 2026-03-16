@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="stylesheet" href="ui.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>②福ねぎ注文数</title>
+
+        
+</head>
+<body>
+
+    <h1>②福ねぎ注文数</h1>
+	<h3> 前の週の注文実績と、今週の注文数をそれ俺入力する</h3>
+<div class="table-wrapper">
+
+    <table>
+        <tr>
+            <th>出荷先</th>
+            <th>前の週の注文数（実績）（ケース）</th>
+            <th>今週の注文数（ケース）</th>
+            <th>差分（ケース）</th>
+        </tr>
+
+        <tr>
+            <td>大阪</td>
+            <td><input type="number" id="osaka_before"></td>
+            <td><input type="number" id="osaka_after"></td>
+            <td id="osaka_diff">0</td>
+        </tr>
+
+        <tr>
+            <td>東京シティ</td>
+            <td><input type="number" id="tokyo_before"></td>
+            <td><input type="number" id="tokyo_after"></td>
+            <td id="tokyo_diff">0</td>
+        </tr>
+
+        <tr class="highlight">
+            <td>合計</td>
+            <td id="total_before">0</td>
+            <td id="total_after">0</td>
+            <td id="total_diff">0</td>
+        </tr>
+    </table>
+	</div>
+
+<div class="nav-buttons">
+
+    <a href="index.html" class="btn-prev">戻る</a>
+    <a href="next2.html" class="btn-next">次へ</a>
+</div>
+
+
+    <script>
+    const inputs = document.querySelectorAll("input");
+
+    inputs.forEach(input => {
+        input.addEventListener("input", calc);
+    });
+
+    function calc() {
+        const osaka_before = Number(document.getElementById("osaka_before").value) || 0;
+        const osaka_after  = Number(document.getElementById("osaka_after").value) || 0;
+
+        const tokyo_before = Number(document.getElementById("tokyo_before").value) || 0;
+        const tokyo_after  = Number(document.getElementById("tokyo_after").value) || 0;
+
+        // 個別差分
+        const osaka_diff = osaka_after - osaka_before;
+        const tokyo_diff = tokyo_after - tokyo_before;
+
+        document.getElementById("osaka_diff").textContent = osaka_diff;
+        document.getElementById("tokyo_diff").textContent = tokyo_diff;
+
+        // 合計
+        const total_before = osaka_before + tokyo_before;
+        const total_after  = osaka_after + tokyo_after;
+        const total_diff   = total_after - total_before;
+
+        document.getElementById("total_before").textContent = total_before;
+        document.getElementById("total_after").textContent = total_after;
+        document.getElementById("total_diff").textContent = total_diff;
+
+        // ★差分（増減どちらも）を保存
+        localStorage.setItem("order_diff", total_diff);
+    }
+</script>
+
+
+</body>
+</html>

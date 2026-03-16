@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="stylesheet" href="ui.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>④週末の出荷予定数</title>
+
+  
+</head>
+<body>
+
+<h1>④ 週末の出荷予定数</h1>
+＜h3＞　入荷予定の630の数量と〇調の持ち込み量（重量）をそれぞれ入力します。</h3>
+
+<!-- ① 630予定数量の表 -->
+<h2>630の入荷予定数</h2>
+
+<div class="table-wrapper">
+
+<table>
+    <tr>
+        <th></th>
+        <th>木曜</th>
+        <th>金曜</th>
+        <th>合計（ケース）</th>
+    </tr>
+    <tr>
+        <td>630数量（ケース）</td>
+        <td><input type="number" class="ship630 thu630"></td>
+        <td><input type="number" class="ship630 fri630"></td>
+        <td id="sum630">0</td>
+    </tr>
+</table>
+
+<!-- ② ○調製品率 -->
+<h2>○調製品率</h2>
+<h3>実績から55％が製品になると想定しています。</h3>
+<input type="number" id="rate" value="0.55" step="0.01" style="width:120px; font-size:20px; text-align:right;">
+
+<!-- ③ ○調数量の表 -->
+<h2>○調持ち込み量</h2>
+<h3>〇調の持ち込み予定重量を入力してください。作成予定数量を自動で計算します</h3>
+<div class="table-wrapper">
+
+<table>
+    <tr>
+        <th></th>
+        <th>木曜</th>
+        <th>金曜</th>
+        <th>合計</th>
+    </tr>
+
+    <!-- 荷受量 -->
+    <tr>
+        <td>荷受量【kg】</td>
+        <td><input type="number" class="choWeight thuCho"></td>
+        <td><input type="number" class="choWeight friCho"></td>
+        <td id="choWeightTotal">0</td>
+    </tr>
+
+    <!-- ↓ 区切り -->
+    <tr>
+        <td colspan="4" style="background:#fafafa; font-weight:bold;">↓</td>
+    </tr>
+
+    <!-- 作成箱数 -->
+    <tr>
+        <td>作成箱数（ケース）</td>
+        <td id="choBoxThu">0</td>
+        <td id="choBoxFri">0</td>
+        <td id="choBoxTotal">0</td>
+    </tr>
+</table>
+</div>
+</div>
+<!-- ④ 出荷予定数 -->
+<div class="total-box">
+    出荷予定数(630＋〇調)（ケース）：<span id="totalShip">0</span>
+</div>
+
+<div class="nav-buttons">
+<a href="next2.html" class="btn-prev">戻る</a>
+<a href="next4.html" class="btn-next">次へ</a>
+
+</div>
+
+
+<script>
+    const rateInput = document.getElementById("rate");
+
+    // 製品率の初期値保存
+    if (!localStorage.getItem("rate")) {
+        localStorage.setItem("rate", 0.55);
+    } else {
+        rateInput.value = localStorage.getItem("rate");
+    }
+
+    rateInput.addEventListener("change", () => {
+        if (!confirm("本当に変更しますか？")) {
+            rateInput.value = localStorage.getItem("rate") || 0.55;
+        } else {
+            localStorage.setItem("rate", rateInput.value);
+            calcAll();
+        }
+    });
+
+    const ship630 = document.querySelectorAll(".ship630");
+    const sum630 = document.getElementById("sum630");
+
+    const choWeightInputs = document.querySelectorAll(".choWeight");
+    const choWeightTotal = document.getElementById("choWeightTotal");
+
+    const choBoxThu = document.getElementById("choBoxThu");
+    const choBoxFri = document.getElementById("choBoxFri");
+    const choBoxTotal = document.getElementById("choBoxTotal");
+
+    const totalShip = document.getElementById("totalShip");
+
+    ship630.forEach(i => i.addEventListener("input", calcAll));
+    choWeightInputs.forEach(i => i.addEventListener("input", calcAll));
+// ★ ページ読み込み時に必ず1回実行
+calcAll();
+
+    function calcAll() {
+        // 630合計（ケース）
+        let s630 = 0;
+        ship630.forEach(i => s630 += Number(i.value) || 0);
+        sum630.textContent = s630;
+
+        // ○調 荷受量（kg）
+        const thuWeight = Number(document.querySelector(".choWeight.thuCho").value) || 0;
+        const friWeight = Number(document.querySelector(".choWeight.friCho").value) || 0;
+        const weightTotal = thuWeight + friWeight;
+        choWeightTotal.textContent = weightTotal;
+
+        // 製品率
+        const rate = Number(localStorage.getItem("rate")) || 0.55;
+
+        // 作成箱数（ケース）曜日別
+        const thuBox = Math.floor((thuWeight * rate) / 0.6);
+        const friBox = Math.floor((friWeight * rate) / 0.6);
+
+        choBoxThu.textContent = thuBox;
+        choBoxFri.textContent = friBox;
+
+        const boxTotal = thuBox + friBox;
+        choBoxTotal.textContent = boxTotal;
+
+        // 出荷予定数 = 630合計 + ○調作成箱数合計
+        const total = s630 + boxTotal;
+        totalShip.textContent = total;
+
+        // 次ページ用に保存
+		console.log("total_ship 保存前 total =", total);
+
+        localStorage.setItem("ship630_total", s630);
+        localStorage.setItem("cho_total", weightTotal);
+        localStorage.setItem("box_count", boxTotal);
+        localStorage.setItem("total_ship", total);
+		console.log("保存された total_ship =", localStorage.getItem("total_ship"));
+
+    }
+</script>
+
+</body>
+</html>

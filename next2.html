@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="stylesheet" href="ui.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>③週末の福ねぎ注文予定数</title>
+
+    
+</head>
+<body>
+
+<h1>③ 週末の福ねぎ注文予定数</h1>
+<h3>木・金・日曜に出荷する各市場の前の週の注文実績を入力します</h3>
+<div class="table-wrapper">
+
+<table>
+    <tr>
+        <th>出荷先</th>
+        <th>木曜</th>
+        <th>金曜</th>
+        <th>日曜</th>
+        <th>合計（ケース）</th>
+    </tr>
+
+    <!-- アルク -->
+    <tr>
+        <td>アルク</td>
+        <td><input type="number" class="order thu"></td>
+        <td class="disabled-cell"></td>
+        <td class="disabled-cell"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- Yフーズ -->
+    <tr>
+        <td>Yフーズ</td>
+        <td><input type="number" class="order thu"></td>
+        <td class="disabled-cell"></td>
+        <td class="disabled-cell"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 福岡 -->
+    <tr>
+        <td>福岡</td>
+        <td><input type="number" class="order thu"></td>
+        <td><input type="number" class="order fri"></td>
+        <td><input type="number" class="order sat"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 北九州 -->
+    <tr>
+        <td>北九州</td>
+        <td class="disabled-cell"></td>
+        <td><input type="number" class="order fri"></td>
+        <td class="disabled-cell"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 大分 -->
+    <tr>
+        <td>大分</td>
+        <td class="disabled-cell"></td>
+        <td><input type="number" class="order fri"></td>
+        <td class="disabled-cell"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 新宿ベジフル -->
+    <tr>
+        <td>新宿ベジフル</td>
+        <td class="disabled-cell"></td>
+        <td class="disabled-cell"></td>
+        <td><input type="number" class="order sat"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 大阪 -->
+    <tr>
+        <td>大阪</td>
+        <td class="disabled-cell"></td>
+        <td class="disabled-cell"></td>
+        <td><input type="number" class="order sat"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 東京シティ -->
+    <tr>
+        <td>東京シティ</td>
+        <td class="disabled-cell"></td>
+        <td class="disabled-cell"></td>
+        <td><input type="number" class="order sat"></td>
+        <td class="row-total">0</td>
+    </tr>
+
+    <!-- 列合計 -->
+    <tr>
+        <th>合計（ケース）</th>
+        <th id="thu_total">0</th>
+        <th id="fri_total">0</th>
+        <th id="sat_total">0</th>
+        <th id="all_total">0</th>
+    </tr>
+</table>
+</div>
+<h3>前頁で計算した東京シティ⁺大阪の注文増減数の半分が変化すると考える</h3>
+<div class="total-box">
+    予想注文増減数（ケース）：<span id="diff">0</span>
+</div>
+
+<h3>前の週の注文実績の合計に予想注文増減数を加えたもの</h3>
+<div class="total-box">
+    合計注文予想数（ケース）：<span id="predicted">0</span>
+</div>
+
+<div class="nav-buttons">
+<a href="next.html" class="btn-prev">戻る</a>
+<a href="next3.html" class="btn-next">次へ</a>
+</div>
+
+
+<script>
+
+
+    const inputs = document.querySelectorAll(".order");
+    const rowTotals = document.querySelectorAll(".row-total");
+
+    const thuTotal = document.getElementById("thu_total");
+    const friTotal = document.getElementById("fri_total");
+    const satTotal = document.getElementById("sat_total");
+    const allTotal = document.getElementById("all_total");
+
+    const diffBox = document.getElementById("diff");
+    const predictedBox = document.getElementById("predicted");
+
+    inputs.forEach(input => input.addEventListener("input", calc));
+
+
+    function calc() {
+    let thu = 0, fri = 0, sat = 0, total = 0;
+
+    // 行合計
+    rowTotals.forEach((cell, idx) => {
+        const rowInputs = cell.parentElement.querySelectorAll("input");
+        let sum = 0;
+        rowInputs.forEach(i => sum += Number(i.value) || 0);
+        cell.textContent = sum;
+    });
+
+    // 列合計
+    document.querySelectorAll(".thu").forEach(i => thu += Number(i.value) || 0);
+    document.querySelectorAll(".fri").forEach(i => fri += Number(i.value) || 0);
+    document.querySelectorAll(".sat").forEach(i => sat += Number(i.value) || 0);
+
+    thuTotal.textContent = thu;
+    friTotal.textContent = fri;
+    satTotal.textContent = sat;
+
+    total = thu + fri + sat;
+    allTotal.textContent = total;
+
+    // ★ next.html の増減差分（増減どちらも）
+    const diff_raw = Number(localStorage.getItem("order_diff")) || 0;
+
+    // ★ ここで 1/2 にする
+    const diff = diff_raw / 2;
+
+    // 表示
+    diffBox.textContent = diff;
+
+    // ★ 合計注文予想数
+    const predicted = total + diff;
+    predictedBox.textContent = predicted;
+
+    // 次ページ用に保存
+	console.log("predicted_order 保存前 predicted =", predicted);
+    localStorage.setItem("predicted_order", predicted);
+	console.log("保存された predicted_order =", localStorage.getItem("predicted_order"));
+
+}
+
+</script>
+
+</body>
+</html>

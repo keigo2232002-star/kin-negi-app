@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="stylesheet" href="ui.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⑤ 出荷調整確認</title>
+
+  
+</head>
+
+<body>
+
+<h1>⑤ 出荷調整確認</h1>
+
+<!-- デバッグ表示 -->
+<!--<div class="box">
+    <div class="debug-label">debug:</div>
+     predicted_order = <span id="dbgPred" class="debug-value"></span><br>
+     total_ship      = <span id="dbgShip" class="debug-value"></span><br>
+     heisoku_diff    = <span id="dbgHei"  class="debug-value"></span><br>
+     order_diff      = <span id="dbgOrderDiff" class="debug-value"></span>
+ </div> -->
+
+
+<div class="box">
+    (1) 火曜日の平束の増減数（ケース）：<span id="diff">0</span>
+</div>
+
+<div class="box">
+    (2) 週末の合計注文予想数（ケース）：<span id="predicted">0</span><br>
+</div>    
+	<div class="box">
+	(3) 週末の出荷予定数(630⁺〇調分)（ケース）：<span id="ship">0</span>
+</div>
+
+<div class="box">
+    (4) 630出荷調整量(630を増やすか減らすか？）（ケース）：<span id="adjust630">0</span>
+</div>
+
+<div class="box" id="zeroBox" style="display:none;">
+    過不足なしです。当初の予定数通り出荷してください。
+</div>
+
+<div class="box" id="reduceBox" style="display:none;">
+    <span id="reduceMsg"></span>
+</div>
+
+<div class="box" id="increaseBox" style="display:none;">
+    <h4>(5) 630追加入荷量の調整</h4>
+
+    <div class="input-row">
+        木曜：<input type="number" id="thuInput">
+    </div>
+
+    <div class="input-row">
+        金曜：<input type="number" id="friInput" readonly>
+    </div>
+
+    <div class="error" id="errorMsg"></div>
+</div>
+
+<div class="box" id="hiratabaBox" style="display:none;">
+    <span id="hiratabaMsg"></span>
+</div>
+<div class="nav-buttons">
+<a href="next3.html" class="btn-prev">戻る</a>
+</div>
+
+
+<!-- ★★★ script は必ず body の最後に置く ★★★ -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("next4 DOM loaded");
+
+    // localStorage から数値を安全に取得するヘルパー
+    function getNumberFromStorage(key) {
+        const raw = localStorage.getItem(key);
+        if (raw === null || raw === "") return null;
+        const num = Number(raw);
+        return Number.isNaN(num) ? null : num;
+    }
+
+    // 4変数を取得
+    const rawPred      = localStorage.getItem("predicted_order");
+    const rawShip      = localStorage.getItem("total_ship");
+    const rawHei       = localStorage.getItem("heisoku_diff");
+    const rawOrderDiff = localStorage.getItem("order_diff");
+
+
+
+
+    // 数値として使う値
+    const predicted = getNumberFromStorage("predicted_order") ?? 0;
+    const ship      = getNumberFromStorage("total_ship")      ?? 0;
+    const diff      = getNumberFromStorage("heisoku_diff")    ?? 0;
+
+    document.getElementById("predicted").textContent = predicted;
+    document.getElementById("ship").textContent      = ship;
+    document.getElementById("diff").textContent      = diff;
+
+    // 630出荷調整量
+    const adjust        = predicted - ship;
+    const adjustRounded = Math.round(adjust);
+
+    if (Number.isInteger(adjust)) {
+        document.getElementById("adjust630").textContent = adjust;
+    } else {
+        document.getElementById("adjust630").textContent =
+            `${adjust}（四捨五入：${adjustRounded}）`;
+    }
+
+    localStorage.setItem("adjust630", String(adjustRounded));
+
+    // ① ±0 の場合
+    if (adjustRounded === 0) {
+        document.getElementById("zeroBox").style.display = "block";
+        return;
+    }
+
+    // ② 減らす場合
+    if (adjustRounded < 0) {
+        document.getElementById("reduceBox").style.display = "block";
+        document.getElementById("reduceMsg").textContent =
+            `630出荷量を ${Math.abs(adjustRounded)} ケース減らします`;
+    }
+
+    // ③ 増やす場合
+    if (adjustRounded > 0) {
+        document.getElementById("increaseBox").style.display = "block";
+
+        const thuInput = document.getElementById("thuInput");
+        const friInput = document.getElementById("friInput");
+        const errorMsg = document.getElementById("errorMsg");
+
+        thuInput.addEventListener("input", () => {
+            const thu = Number(thuInput.value) || 0;
+            const fri = adjustRounded - thu;
+
+            friInput.value = fri;
+
+            if (thu < 0 || fri < 0) {
+                errorMsg.textContent = "※ 入力値が調整量を超えています";
+            } else {
+                errorMsg.textContent = "";
+            }
+        });
+    }
+
+    // ④ 平束崩れ判定
+    if (adjustRounded > 0 && diff < 0) {
+        const hiratabaBox = document.getElementById("hiratabaBox");
+        const hiratabaMsg = document.getElementById("hiratabaMsg");
+
+        hiratabaBox.style.display = "block";
+
+        const hirataba = Math.abs(diff) * 4;
+
+        if (hirataba > adjustRounded) {
+            hiratabaMsg.textContent =
+                `平束崩れとして(630${adjustRounded}ケース分）のみ受入可能です`;
+        } else {
+            hiratabaMsg.textContent =
+                `平束崩れ分全数、（630換算で${hirataba} ケース分）受入可能です`;
+        }
+    }
+
+});
+</script>
+
+</body>
+</html>
